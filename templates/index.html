@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="AI-powered license plate detection using image upload or live camera."
+    >
+
+    <title>{{ app_name }}</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ request.url_for('static', path='style.css') }}"
+    >
+</head>
+
+<body>
+
+    <div class="background-grid"></div>
+    <div class="glow glow-left"></div>
+    <div class="glow glow-right"></div>
+
+    <header class="navbar">
+        <div class="container navbar-content">
+
+            <a href="/" class="brand">
+                <div class="brand-logo">
+                    PV
+                </div>
+
+                <div>
+                    <h2>Vision AI</h2>
+                    <p>License Plate Detection Studio</p>
+                </div>
+            </a>
+
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                Detection model ready
+            </div>
+
+        </div>
+    </header>
+
+
+    <main class="container">
+
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <span class="hero-label">
+                    AI-POWERED LICENSE PLATE DETECTION
+                </span>
+
+                <h1>
+                    Detect license plates from an
+                    <span>image</span>
+                    or
+                    <span>live camera</span>
+                </h1>
+
+                <p>
+                    Upload a vehicle image or capture one from your webcam.
+                    PlateVision securely sends the image through FastAPI to
+                    your deployed Ultralytics model.
+                </p>
+
+            </div>
+
+            <div class="hero-icon">
+                <strong>AI</strong>
+                <span>Object Detection</span>
+            </div>
+
+        </section>
+
+
+        <section class="application-layout">
+
+            <div class="control-card glass-card">
+
+                <div class="input-tabs">
+
+                    <button
+                        id="uploadTab"
+                        class="tab-button active"
+                        type="button"
+                    >
+                        Upload Image
+                    </button>
+
+                    <button
+                        id="cameraTab"
+                        class="tab-button"
+                        type="button"
+                    >
+                        Live Camera
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="uploadSection"
+                    class="tab-section active"
+                >
+
+                    <label
+                        id="dropZone"
+                        class="drop-zone"
+                        for="imageInput"
+                    >
+
+                        <input
+                            id="imageInput"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            hidden
+                        >
+
+                        <div class="upload-icon">
+                            ↑
+                        </div>
+
+                        <h3>Upload a vehicle image</h3>
+
+                        <p>
+                            Drag and drop your image here
+                        </p>
+
+                        <span>
+                            JPG, PNG or WEBP · Maximum 10 MB
+                        </span>
+
+                        <div class="choose-button">
+                            Choose Image
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+                <div
+                    id="cameraSection"
+                    class="tab-section"
+                >
+
+                    <div class="camera-container">
+
+                        <video
+                            id="cameraVideo"
+                            autoplay
+                            muted
+                            playsinline
+                        ></video>
+
+                        <div
+                            id="cameraPlaceholder"
+                            class="camera-placeholder"
+                        >
+
+                            <div class="camera-placeholder-icon">
+                                ◉
+                            </div>
+
+                            <h3>Camera is off</h3>
+
+                            <p>
+                                Click Start Camera and allow browser access.
+                            </p>
+
+                        </div>
+
+                        <canvas
+                            id="cameraCanvas"
+                            hidden
+                        ></canvas>
+
+                    </div>
+
+
+                    <div class="camera-actions">
+
+                        <button
+                            id="startCameraButton"
+                            class="secondary-button"
+                            type="button"
+                        >
+                            Start Camera
+                        </button>
+
+                        <button
+                            id="captureButton"
+                            class="primary-button"
+                            type="button"
+                            disabled
+                        >
+                            Capture Image
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="settings-section">
+
+                    <div class="settings-header">
+
+                        <h3>Inference Settings</h3>
+
+                        <button
+                            id="resetSettingsButton"
+                            type="button"
+                        >
+                            Reset
+                        </button>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <div class="range-header">
+
+                            <label for="confidenceInput">
+                                Confidence
+                            </label>
+
+                            <output id="confidenceValue">
+                                0.25
+                            </output>
+
+                        </div>
+
+                        <input
+                            id="confidenceInput"
+                            type="range"
+                            min="0"
+                            max="1"
+                            value="0.25"
+                            step="0.01"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <div class="range-header">
+
+                            <label for="iouInput">
+                                IoU Threshold
+                            </label>
+
+                            <output id="iouValue">
+                                0.70
+                            </output>
+
+                        </div>
+
+                        <input
+                            id="iouInput"
+                            type="range"
+                            min="0"
+                            max="1"
+                            value="0.70"
+                            step="0.01"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="imageSizeInput">
+                            Image Size
+                        </label>
+
+                        <select id="imageSizeInput">
+                            <option value="320">
+                                320 px
+                            </option>
+
+                            <option value="480">
+                                480 px
+                            </option>
+
+                            <option
+                                value="640"
+                                selected
+                            >
+                                640 px
+                            </option>
+
+                            <option value="960">
+                                960 px
+                            </option>
+
+                            <option value="1280">
+                                1280 px
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="predictButton"
+                    class="predict-button"
+                    type="button"
+                    disabled
+                >
+
+                    <span id="predictButtonText">
+                        Detect License Plate
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+
+                </button>
+
+
+                <p
+                    id="errorMessage"
+                    class="error-message"
+                    aria-live="polite"
+                ></p>
+
+            </div>
+
+
+            <div class="result-card glass-card">
+
+                <div class="result-header">
+
+                    <div>
+                        <span class="section-label">
+                            DETECTION PREVIEW
+                        </span>
+
+                        <h2 id="previewTitle">
+                            No image selected
+                        </h2>
+                    </div>
+
+                    <button
+                        id="clearButton"
+                        class="clear-button"
+                        type="button"
+                        title="Clear image"
+                        disabled
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="previewArea"
+                    class="preview-area"
+                >
+
+                    <div
+                        id="emptyPreview"
+                        class="empty-preview"
+                    >
+
+                        <div class="preview-placeholder">
+                            +
+                        </div>
+
+                        <h3>
+                            Your detection result will appear here
+                        </h3>
+
+                        <p>
+                            Upload an image or capture one from your camera.
+                        </p>
+
+                    </div>
+
+
+                    <canvas id="resultCanvas"></canvas>
+
+
+                    <div
+                        id="loadingOverlay"
+                        class="loading-overlay"
+                    >
+
+                        <div class="spinner"></div>
+
+                        <strong>
+                            Detecting license plates
+                        </strong>
+
+                        <span>
+                            Processing the image with Ultralytics
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="result-metrics">
+
+                    <div class="metric-card">
+                        <span>Detections</span>
+
+                        <strong id="detectionCount">
+                            —
+                        </strong>
+                    </div>
+
+
+                    <div class="metric-card">
+                        <span>Top Confidence</span>
+
+                        <strong id="topConfidence">
+                            —
+                        </strong>
+                    </div>
+
+
+                    <div class="metric-card">
+                        <span>Inference Time</span>
+
+                        <strong id="inferenceTime">
+                            —
+                        </strong>
+                    </div>
+
+
+                    <div class="metric-card">
+                        <span>Status</span>
+
+                        <strong id="resultStatus">
+                            Waiting
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="detectionsListSection"
+                    class="detections-list-section"
+                >
+
+                    <div class="detections-list-header">
+                        <h3>Detected Objects</h3>
+                    </div>
+
+                    <div
+                        id="detectionsList"
+                        class="detections-list"
+                    >
+                        <p class="no-detections-message">
+                            No detections yet.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <details class="json-section">
+
+                    <summary>
+                        View Raw API Response
+                    </summary>
+
+                    <pre id="jsonOutput">No prediction response yet.</pre>
+
+                </details>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+        Built with FastAPI, JavaScript and Ultralytics
+    </footer>
+
+
+    <script
+        src="{{ request.url_for('static', path='script.js') }}"
+    ></script>
+
+</body>
+</html>
