@@ -1,6 +1,6 @@
 # Car License Plate Detection App
 
-A modern web app for detecting and analyzing license plates from uploaded vehicle images or live camera captures. The project uses FastAPI on the backend, Jinja templates for the frontend UI, and an external Ultralytics-based prediction service for inference.
+modern web app for detecting and analyzing license plates from uploaded vehicle images or live camera captures. The project uses FastAPI on the backend, Jinja templates for the frontend UI, and an external Ultralytics-based prediction service for inference.
 
 ## Features
 
